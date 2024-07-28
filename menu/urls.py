@@ -10,4 +10,5 @@ urlpatterns = [
     path('', include(router.urls)),
     path('categorias/', views.CategoriaCreateView.as_view()),
     path('productos/', views.ProductoCreateView.as_view()),
+    path('menu/<int:pk>/platos_menu/', views.platos_menu_count),
 ]

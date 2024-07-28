@@ -1,15 +1,6 @@
 from django.db import models
 
 
-class Menu(models.Model):
-    descripcion = models.CharField(max_length=250)
-    fechaInicio = models.DateTimeField()
-    fechaFinal = models.DateTimeField()
-
-    def __str__(self):
-        return self.descripcion
-
-
 class Categoria(models.Model):
     nombre = models.CharField(max_length=150, unique=True)
 
@@ -20,10 +11,19 @@ class Categoria(models.Model):
 class Plato(models.Model):
     nombre = models.CharField(max_length=150)
     categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE)
-    menu = models.ManyToManyField(Menu, blank=True)
 
     def __str__(self):
         return self.nombre
+
+
+class Menu(models.Model):
+    descripcion = models.CharField(max_length=250)
+    fechaInicio = models.DateTimeField()
+    fechaFinal = models.DateTimeField()
+    plato = models.ManyToManyField(Plato, blank=True)
+
+    def __str__(self):
+        return self.descripcion
 
 
 class ProductUnits(models.TextChoices):
