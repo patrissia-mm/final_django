@@ -1,6 +1,6 @@
-from .models import Menu, Plato, Categoria, Producto
+from .models import Menu, Plato, Categoria, Producto, PlatoProducto
 from .serializers import MenuSerializer, PlatoSerializer, CategoriaSerializer, ProductoSerializer
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from rest_framework import viewsets, status
 from rest_framework import generics
@@ -35,11 +35,54 @@ def platos_menu_count(request, pk):
         cantidad = menu.plato.count()
         return JsonResponse(
             {
-                'menu_id': menu.id, 
+                'menu_id': menu.id,
                 'plato_count': cantidad
             },
             safe=False,
             status=200
+        )
+    except Exception as e:
+        return JsonResponse(
+            {
+                'error': str(e)
+            },
+            safe=False,
+            status=400
+        )
+
+
+@api_view(['GET'])
+def lista_compras(request, menu_id):
+    """Devuelve la lista de compras basada en un menú"""
+    try:
+        menu = get_object_or_404(Menu, pk=menu_id)
+        productos = {}
+
+        for plato in menu.plato.all():
+            for platoproducto in PlatoProducto.objects.filter(plato=plato):
+                producto = platoproducto.producto
+                if producto.id in productos:
+                    if producto.id in productos:
+                        productos[producto.id]['çantidad'] += platoproducto.cantidad
+                    else:
+                        productos[producto.id] = {
+                            'nombre': producto.nombre,
+                            'cantidad': platoproducto.cantidad
+                        }
+
+        return JsonResponse(
+            {
+                "productos": list(productos.values())
+            },
+            safe=False,
+            status=200
+        )
+    except Menu.DoesNotExist:
+        return JsonResponse(
+            {
+                'error': 'Menu no encontrado'
+            },
+            status=404
         )
     except Exception as e:
         return JsonResponse(
